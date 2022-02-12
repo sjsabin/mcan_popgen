@@ -1,0 +1,112 @@
+// SLiM MODEL er_psi_dfe, Susanna Sabin
+// SLiM script to model a Mycobacterium canettii population WITH progeny skew and without bottleneck with empirical recombination rate
+// With slightly deleterious, nearly neutral DFE
+// Based on script written by Ana Morales-Arce, exponential population growth section written by AMA.
+// Ne=10000
+
+
+initialize() {
+	defineConstant("L", 413587); // Length of MCAN genome minus problematic sites
+	initializeSLiMOptions(nucleotideBased=T);
+	initializeAncestralNucleotides(randomNucleotides(L));
+	//initializeMutationRate(6e-08);
+	initializeMutationTypeNuc("m1", 1.0, "f", -0.0001);   // weakly deleterious (actually Ne*s= 1 so it's effectively neutral
+	initializeMutationTypeNuc("m2", 1.0, "f", -0.001);   // weakly deleterious Ne*s=10
+	initializeGenomicElementType("g1", c(m1,m2), c(1.0,1.0), mmJukesCantor(2e-08)); // Overall mutation rate is 6e-08 - probability of any nucleotide mutating to any other nucleotide is 2e-08 uniformly (Jukes Cantor)
+	initializeGenomicElement(g1, 0, L-1);		// One-tenth of total genome size (4482059 bp) adjusted for excluded sites (4135873 bp)
+	initializeRecombinationRate(7.2e-11);
+}1 {
+	defineConstant("N",10000);
+	sim.addSubpop("p1", N);
+	defineConstant("mmcgens2",c(2:101000));
+	defineConstant("psi",0.067);
+	
+	if(psi!=0){
+		for(gen in mmcgens2){
+			//print(p1.individualCount);
+			sim.registerEarlyEvent(NULL,s2.source, gen, gen);
+			//print(p1.individualCount);
+			sim.registerModifyChildCallback(NULL,s3.source,NULL,gen,gen);
+			//print(p1.individualCount);
+			sim.registerLateEvent(NULL,s4.source, gen, gen);
+			//print(p1.individualCount);
+		
+		}}
+	
+	sim.deregisterScriptBlock(s2);
+	sim.deregisterScriptBlock(s3);
+	sim.deregisterScriptBlock(s4);
+}
+
+
+s2 2 early(){
+	sim.addSubpopSplit(2,1,p1);
+	p1.setMigrationRates(2, psi);
+	countingp1= N-round(N*psi);
+	countingother=round(N-countingp1);
+	countingp1=countingp1+(N-(countingp1+(countingother)));
+	p1.tag=asInteger(countingp1);
+	p2.tag=asInteger(countingother);
+}
+
+s3 2 modifyChild(){
+	if(subpop.id==1){
+		if (sourceSubpop.id==1 & p1.tag==0){
+			return(F);}
+		else if (sourceSubpop.tag==0){
+			return(F);}
+		else{
+			sourceSubpop.tag=asInteger(sourceSubpop.tag-1);
+			return(T);}}
+	else{return(T);}
+}
+
+
+s4 2 late(){
+	p2.setSubpopulationSize(0);
+}
+
+//10001 {p1.setSubpopulationSize(50);}
+//10002: 10091 {
+//	newSize = asInteger(round(1.033846088214640^(sim.generation - 10001) * 90)); //exponential population growth
+//	p1.setSubpopulationSize(asInteger(newSize));
+//	rm("N", T); //remove previous value of N
+//	defineConstant("N",newSize); // Assign N = N(previous)*exp(r)
+//	print(p1.individualCount);
+//}
+
+101000 late() {
+	// remove any new mutations added to the disabled diploid genomes
+	sim.subpopulations.individuals.genome2.removeMutations();
+	
+	// remove mutations in the haploid genomes that have fixed
+	muts1 = sim.mutationsOfType(m1);
+	freqs1 = sim.mutationFrequencies(NULL, muts1);
+	sim.subpopulations.genomes.removeMutations(muts1[freqs1 == 0.5], T);
+	//	// remove singleton mutations
+	//	counts1 = sim.mutationCounts(NULL, muts1);
+	//	counts2 = sim.mutationCounts(NULL, muts2);
+	//	sim.subpopulations.genomes.removeMutations(muts1[counts1 < 2], T);
+	//	sim.subpopulations.genomes.removeMutations(muts2[counts2 < 2], T);
+
+}
+101000 late() {
+	sim.outputFixedMutations();
+//	p1.outputMSSample(100, replace=F, filePath="~/Desktop/vanilla_5kb_r3e-06_randoNuc.ms.txt");
+	catn("BEGIN FASTA");
+	genomeCount = 499;
+//	catn("positions: " + paste(1:L));
+	s = p1.sampleIndividuals(500);
+	lines = NULL;
+	for (i in 0:genomeCount) {
+		g = s[i].genome1;
+		head = paste(">genome" + i + "\n");
+		genome = paste(g.nucleotides() + "\n");
+		lines = c(lines, head, genome);
+	}
+	file = paste(lines, "");
+	file = "500 413587 1\n" + file;
+	if (!writeFile("er_psi_dfe.fasta", file))
+		stop("Error writing file.");
+}
+
