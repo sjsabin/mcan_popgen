@@ -1,2 +1,89 @@
 # mcan_popgen
-Scripts and data supporting a comparitive population genomics of Mycobacterium canettii and Mycobacterium tuberculosis (Jensen Lab, ASU).
+This repository includes scripts and data supporting a comparitive population genomics of Mycobacterium canettii and Mycobacterium tuberculosis (Jensen Lab, ASU).
+
+## Repository structure  
+
+- *consensus_sequence_processing*
+  - *trimmomatic.sh*: Adapter and quality trimming used on raw MCAN sequencing data
+  - *bwa_snippymem.sh*: Alignment script based on parameters set in the Snippy pipeline for optimal bacterial consensus calling
+  - *freebayes.sh*: SNP calling and filtering script
+  - *bcftools_consensus.sh*: Consensus calling script
+  - *full.multi.fasta.gz*: Compressed multi-fasta file containing the consensus sequences for all MCAN samples in analysis
+- *ldhat_results*
+  - *mcan*
+  	- *mcan_ldhat_convert.sh*: Command line for LDhat-convert, which produced the "sites.txt" and "locs.txt" files used as input for LDhat-pairwise.
+  	- *outfile.txt*: Results of LDhat-pairwise run on the MCAN dataset
+  - *simulations*
+  	- *base*
+  		- *er_convert.sh*
+  		- *er_pw.sh*
+  		- *er.[0..99].pw.outfile.txt*
+  		- *pairwise_stats.txt*
+  	- *base_bn*
+  		- *er_bn_convert.sh*
+  		- *er_bn_pw.sh*
+  		- *er_bn.[0..99].pw.outfile.txt*
+  		- *pairwise_stats.txt*
+  	- *base_bn_dfe*
+  		- *er_bn_dfe_convert.sh*
+  		- *er_bn_dfe_pw.sh*
+  		- *er_bn_dfe.[0..99].pw.outfile.txt*
+  		- *pairwise_stats.txt*
+  	- *base_dfe*
+  		- *er_dfe_convert.sh*
+  		- *er_dfe_pw.sh*
+  		- *er_dfe.[0..99].pw.outfile.txt*
+  		- *pairwise_stats.txt*
+  	- *base_psi*
+  		- *er_psi_convert.sh*
+  		- *er_psi_pw.sh*
+  		- *er_psi.[0..99].pw.outfile.txt*
+  		- *pairwise_stats.txt*
+  	- *base_psi_bn*
+  		- *er_psi_bn_convert.sh*
+  		- *er_psi_bn_pw.sh*
+  		- *er_psi_bn.[0..99].pw.outfile.txt*
+  		- *pairwise_stats.txt*
+  	- *base_psi_bn_dfe*
+  		- *er_psi_bn_dfe_convert.sh*
+  		- *er_psi_bn_dfe_pw.sh*
+  		- *er_psi_bn_dfe.[0..99].pw.outfile.txt*
+  		- *pairwise_stats.txt*
+  	- *base_psi_dfe*
+  		- *er_psi_dfe_convert.sh*
+  		- *er_psi_dfe_pw.sh*
+  		- *er_psi_dfe.[0..99].pw.outfile.txt*
+  		- *pairwise_stats.txt*
+- *simulations*
+	- *fasta_to_consensus.py*
+	- *base*
+		- *base.slim*
+	- *base_bn*
+		- *base_bn.slim*
+	- *base_bn_dfe*
+		- *base_bn_dfe.slim*
+	- *base_dfe*
+		- *base_dfe.slim*
+	- *base_psi*
+		- *base_psi.slim*
+	- *base_psi*
+		- *base_psi.slim*
+	- *base_psi_bn*
+		- *base_psi_bn.slim*
+	- *base_psi_bn_dfe*
+		- *base_psi_bn_dfe.slim*
+	- *base_psi_dfe*
+		- *base_psi_dfe.slim*
+- *within_host_diversity_processing*
+	- *traunerPipe_scythe_sickle.sh*
+	- *within_host_variation_alignment.sh*
+	- *traunerPipe_ps_Serial_Deepseq_Variant_calling.sh*
+	- *mcan*
+		- *mcan_snp_counts.txt*: Low frequency SNP counts per sample.
+		- *mcan_filter_snp_files*
+			- *[sample_name].filter.snp*: Each file contains the filtered low frequency SNP positions and nucleotides for a given sample.
+	- *mtbc*
+		- *mtbc_snp_counts.txt*: Low frequency SNP counts per sample.
+		- *mtbc_filter_snp_files*
+			- *[sample_name].filter.snp*: Each file contains the filtered low frequency SNP positions and nucleotides for a given sample.
+
